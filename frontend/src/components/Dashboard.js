@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
-// A simple spinner component
+
 const Spinner = () => (
   <div className="spinner-container">
     <div className="spinner"></div>
@@ -32,10 +32,10 @@ const Dashboard = () => {
       return;
     }
     
-    // Decode user email from JWT for a personalized welcome
+    
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        // Capitalize the first letter of the user's name
+        
         const name = payload.userId.split('@')[0];
         setUserName(name.charAt(0).toUpperCase() + name.slice(1));
     } catch (e) { console.error("Failed to parse token"); }
@@ -75,13 +75,13 @@ const Dashboard = () => {
   };
 
   const handleDeleteNote = async (noteId) => {
-    // Optimistic UI update
+    
     const originalNotes = [...notes];
     setNotes(notes.filter((note) => note._id !== noteId));
     try {
       await api.delete(`/notes/${noteId}`);
     } catch (err) {
-      // Revert if API call fails
+      
       setNotes(originalNotes);
       console.error('Failed to delete note', err);
     }
