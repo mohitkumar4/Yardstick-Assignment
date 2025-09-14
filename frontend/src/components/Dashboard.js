@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 
-
+// A simple spinner component
 const Spinner = () => (
   <div className="spinner-container">
     <div className="spinner"></div>
@@ -20,6 +20,11 @@ const Dashboard = () => {
 
   const navigate = useNavigate();
 
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem('token');
+    navigate('/login');
+  }, [navigate]);
+
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -27,10 +32,12 @@ const Dashboard = () => {
       return;
     }
     
-    
+    // Decode user email from JWT for a personalized welcome
     try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        setUserName(payload.userId.split('@')[0]); 
+        // Capitalize the first letter of the user's name
+        const name = payload.userId.split('@')[0];
+        setUserName(name.charAt(0).toUpperCase() + name.slice(1));
     } catch (e) { console.error("Failed to parse token"); }
 
     const fetchNotes = async () => {
@@ -45,7 +52,7 @@ const Dashboard = () => {
     };
     
     fetchNotes();
-  }, [navigate]);
+  }, [navigate, handleLogout]);
 
   const handleCreateNote = async (e) => {
     e.preventDefault();
@@ -68,25 +75,25 @@ const Dashboard = () => {
   };
 
   const handleDeleteNote = async (noteId) => {
-    
+    // Optimistic UI update
     const originalNotes = [...notes];
     setNotes(notes.filter((note) => note._id !== noteId));
     try {
       await api.delete(`/notes/${noteId}`);
     } catch (err) {
-      
+      // Revert if API call fails
       setNotes(originalNotes);
       console.error('Failed to delete note', err);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    navigate('/login');
-  };
-
   return (
     <div className="container">
+      <div className="dashboard-header">
+        <h2>Welcome, {userName || 'User'}!</h2>
+        <button onClick={handleLogout} className="btn-logout">Logout</button>
+      </div>
+      
       <div className="dashboard-grid">
         <div className="note-creator">
           <div className="card">
@@ -104,7 +111,6 @@ const Dashboard = () => {
               {error && <p className="error-message">{error}</p>}
             </form>
           </div>
-          <button onClick={handleLogout} style={{width: '100%', marginTop: '1rem', background: 'none', border: 'none', color: 'var(--text-light)', cursor: 'pointer'}}>Log Out</button>
         </div>
         
         <div className="notes-list">
