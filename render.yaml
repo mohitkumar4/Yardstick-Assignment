@@ -14,7 +14,7 @@ services:
         sync: false # You will add this secret in the dashboard
 
   # A Static Site for the Frontend
-  - type: static
+  - type:  static_site
     name: Yardstick-Assignment frontend
     env: static
     rootDir: frontend
